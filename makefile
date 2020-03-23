@@ -1,11 +1,12 @@
 CC = gcc
 CFLAGS=-I.
 LIBS=-lm
-OBJECTS=logging.o
+OBJECTS=cli.o
 
-serialhub: $(OBJECTS) serialhub.c
+serialhub: $(OBJECTS) logging.h serialhub.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
 
+cli.o: cli.c cli.h
 tty.o: tty.c tty.h
 
 
