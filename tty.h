@@ -1,0 +1,2 @@
+
+int serialopen(char *dev);

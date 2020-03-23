@@ -1,26 +1,20 @@
-IDIR =.
-CC=gcc
-CFLAGS=-I$(IDIR)
-
-ODIR=obj
-LDIR =../lib
-
+CC = gcc
+CFLAGS=-I.
 LIBS=-lm
+OBJECTS=main.o tty.o
 
-_DEPS = serialhub.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
+serialhub: $(OBJECTS)
+	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
 
-_OBJ = serialhub.o tty.o 
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+tty.o: tty.c tty.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+main.o: main.c tty.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 
-$(ODIR)/%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-serialhub: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o serialhub
+	rm -f $(OBJECTS) serialhub
