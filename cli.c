@@ -76,7 +76,7 @@ void settingsparse(int argc, char **argv) {
 
 	if (settings.device == NULL) {
         L_ERROR("Please provide device:");
-        argp_help(&argp, stderr, ARGP_HELP_USAGE, "device");
+        argp_help(&argp, stderr, ARGP_HELP_USAGE, argv[0]);
         exit(FAILURE_SETTINGS);
 	}
 }
