@@ -5,18 +5,23 @@
 #include "common.h"
 #include "cli.h"
 
-
-#define DEFAULT_TCPPORT  5600
-
 #define ARG_BACKLOG 0x1
 #define ARG_EPOLL_MAXEVENTS 0x2
 
+#define STRINGIFY2(X) #X
+#define STR(X) STRINGIFY2(X)
+
+#define DEFAULT_TCPPORT     5600
+#define DEFAULT_BAUDRATE    115200
+#define DEFAULT_BIND        "0.0.0.0"
+#define DEFAULT_BACKLOG     1
 
 volatile struct Settings settings = {
-	NULL, 
+	DEFAULT_BIND, 
     NULL,
+    DEFAULT_BAUDRATE,
 	DEFAULT_TCPPORT, 
-	1,
+	DEFAULT_BACKLOG,
 };
 
 
@@ -27,10 +32,14 @@ static char args_doc[] = "DEVICE";
 
 /* Options definition */
 static struct argp_option options[] = {
-	{"port", 'p', "PORT", 0, "Listen port. default: DEFAULT_TCPPORT"},
+	{"port", 'p', "PORT", 0, 
+        "Listen port. default: " STR(DEFAULT_TCPPORT)},
+	{"baudrate", 'b', "BAUDRATE", 0, 
+        "Baudrate, default: " STR(DEFAULT_BAUDRATE)},
 	{"backlog", ARG_BACKLOG, "TCP_BACKLOG", 0, 
-		"TCP backlog, default: 1, see listen(2)."},
-	{"bind", 'b', "ADDRESS", 0, "Listen address. default: 0.0.0.0"},
+		"TCP backlog, default: " STR(DEFAULT_BACKLOG) ", see listen(2)"},
+	{"bind", 'l', "ADDRESS", 0, 
+        "Listen address. default: " DEFAULT_BIND},
 	{0}
 };
 
@@ -43,6 +52,10 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
 			break;
 
 		case 'b':
+			settings.baudrate = atoi(arg);
+			break;
+
+		case 'l':
 			settings.bind = arg;
 			break;
 	

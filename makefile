@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS=-I.
 LIBS=-lm
-OBJECTS=cli.o
+OBJECTS=cli.o tty.o
 
 serialhub: $(OBJECTS) logging.h main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^

@@ -8,7 +8,8 @@
 
 int main(int argc, char **argv) {
     settingsparse(argc, argv);
-
-    printf("Hello\r\n");
+    
+    serialopen(settings.device, settings.baudrate);
+    printf("Hello: %s\n", settings.device);
     return 0;
 }

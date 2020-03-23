@@ -5,6 +5,7 @@
 struct Settings {
 	char *bind;
 	char *device;
+    unsigned int baudrate;
 	unsigned int tcpport; 
 	unsigned int tcpbacklog;
 };
