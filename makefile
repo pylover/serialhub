@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I.
+CFLAGS = -I. -I/usr/src/$(uname -r)/include
 LIBS = -lm
 OBJECTS = settings.o cli.o tty.o
 
