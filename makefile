@@ -3,7 +3,7 @@ CFLAGS=-I.
 LIBS=-lm
 OBJECTS=cli.o
 
-serialhub: $(OBJECTS) logging.h serialhub.c
+serialhub: $(OBJECTS) logging.h main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
 
 cli.o: cli.c cli.h
