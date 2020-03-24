@@ -2,12 +2,12 @@
 #define H_CIRCULARBUFFER
 
 
-typedef struct {
-    char *buffer;
+struct ringbuffer{
+    char *blob;
     int head;
     int tail;
     int size;   // Power of 2
-} Buffer;
+};
 
 
 /* Return count in buffer.  */
@@ -33,7 +33,5 @@ typedef struct {
 	  n <= end ? n : end+1;})
 
 
-
-int bufferallocate(Buffer *buff);
 
 #endif

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <argp.h>
 
-#include "logging.h"
 #include "settings.h"
 #include "common.h"
 #include "cli.h"

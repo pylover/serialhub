@@ -1,5 +1,4 @@
 #include "common.h"
-#include "logging.h"
 #include "settings.h"
 
 #include <arpa/inet.h>
