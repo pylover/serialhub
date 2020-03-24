@@ -2,8 +2,12 @@
 #define H_COMMON
 
 #define OK  0
-#define FAILURE_CLIPARSE        1
-#define FAILURE_SERIALDEVICE    2
+
+enum {
+    FAILURE_CLIPARSE = 1,
+    FAILURE_SERIALDEVICE,
+    FAILURE_ALLOCATE
+};
 
 #define _STR(X) #X
 #define STR(X) _STR(X)
