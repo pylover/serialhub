@@ -7,6 +7,8 @@
 
 
 #define OK  0
+#define CHUNKSIZE   1024
+
 
 enum {
     FAILURE_CLIPARSE = -1,
@@ -20,6 +22,7 @@ enum {
     FAILURE_EPOLLWAIT = -9,
     FAILURE_TCPACCEPT = -10,
     FAILURE_MAXCONNECTIONS = -11,
+    FAILURE_SETNONBLOCKING = -12,
 };
 
 #define _STR(X) #X
@@ -39,5 +42,6 @@ enum {
 #define L_INFO( ... ) LOG(stdout, __VA_ARGS__)
 #define L_ERROR( ... ) LOG(stderr, __VA_ARGS__)
 
+volatile int epollfd;
 
 #endif

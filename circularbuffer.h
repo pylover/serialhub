@@ -33,5 +33,5 @@ struct ringbuffer{
 	  n <= end ? n : end+1;})
 
 
-
+int buffer_readinto(struct ringbuffer *b, int fd);
 #endif

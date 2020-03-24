@@ -16,11 +16,32 @@
 #define MAXEVENTS  10
 
 
+static char serialblob[BUFFERSIZE];
+static struct ringbuffer serialbuffer = {
+    serialblob,
+    0,
+    0,
+    BUFFERSIZE
+};
+
+
+static int _process_serial_interface_io(struct epoll_event e) {
+	int err = OK;
+	if (e.events & EPOLLIN) {
+		err = buffer_readinto(&serialbuffer, e.data.fd);
+        // buffer full
+        // EAGAIN, read will be blocked
+        // TODO: continue here
+	}
+	return err;
+}
+
+
 int main(int argc, char **argv) {
-    int serialfd, tcplistenfd, epollfd, fdcount, i;
+    int serialfd, tcplistenfd, fdcount, i;
     struct epoll_event tcplistenevent, events[MAXEVENTS], *e;
 	struct sockaddr_in listenaddr;
-
+    
     // Parse command line arguments
     cliparse(argc, argv);
     
@@ -43,7 +64,7 @@ int main(int argc, char **argv) {
     }
     
     // Register epoll events
-    tcplistenevent.events = EPOLLIN;
+    tcplistenevent.events = EPOLLIN | EPOLLOUT;
     tcplistenevent.data.fd = tcplistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &tcplistenevent) == -1) {
         L_ERROR("epoll_ctl: tcplisten");

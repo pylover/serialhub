@@ -2,11 +2,29 @@
 #include "connection.h"
 
 #include <stdlib.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 
 
 static struct connection* connections[MAXCONNECTIONS];
+
+
+static int _setnonblocking(int fd) {
+	int opts;
+	if ((opts = fcntl(fd, F_GETFL)) < 0) {
+		L_ERROR("GETFL %d failed", fd);
+		return FAILURE_SETNONBLOCKING;
+	}
+	opts = opts | O_NONBLOCK;
+	if (fcntl(fd, F_SETFL, opts) < 0) {
+		L_ERROR("SETFL %d failed", fd);
+		return FAILURE_SETNONBLOCKING;
+	}
+	return OK;
+}
+
 
 
 static int _getfreeslot() {
@@ -21,9 +39,20 @@ static int _getfreeslot() {
 
 
 int connection_registerevents(struct connection *conn) {
-    // TODO: epoll events
-    return OK;
+    int err;
+	struct epoll_event ev;
+
+	ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+	ev.data.ptr = conn;
+	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn->sockfd, &ev);
+	if (err == -1) {
+		L_ERROR("epoll_ctl: sockfd");
+        return FAILURE_EPOLLCTL;
+	}
+	return OK;
 }
+
+
 
 
 int tcpconnection_accept(int epollfd, int listenfd) {
@@ -43,6 +72,11 @@ int tcpconnection_accept(int epollfd, int listenfd) {
 		return FAILURE_TCPACCEPT;
 	}
     
+	err = _setnonblocking(conn->sockfd);
+    if (err < 0) {
+        return err;
+    }
+
     conn = malloc(sizeof(struct connection));
     if (conn == NULL) {
         L_ERROR("Cannot allocate connection memory");

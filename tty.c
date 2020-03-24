@@ -12,7 +12,7 @@ int serialopen(char *dev, unsigned int baudrate) {
     struct termios options;
 
     L_INFO("DEV: %s, %d", dev, baudrate);
-    int fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
+    int fd = open(dev, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd == -1) {
         L_ERROR("Can't open serial device: %s", dev);
         return fd;
