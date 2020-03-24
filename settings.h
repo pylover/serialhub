@@ -9,7 +9,7 @@
 
 
 struct Settings {
-	char *bind;
+	char *tcpbind;
 	char *device;
     unsigned int baudrate;
 	unsigned int tcpport; 

@@ -23,8 +23,8 @@ static struct argp_option options[] = {
         "Baudrate, default: " STR(DEFAULT_BAUDRATE)},
 	{"backlog", ARG_BACKLOG, "TCP_BACKLOG", 0, 
 		"TCP backlog, default: " STR(DEFAULT_BACKLOG) ", see listen(2)"},
-	{"bind", 'l', "ADDRESS", 0, 
-        "Listen address. default: " DEFAULT_BIND},
+	{"tcpbind", 't', "ADDRESS", 0, 
+        "Listen address for TCP. default: " DEFAULT_BIND},
 	{0}
 };
 
@@ -40,8 +40,8 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
 			settings.baudrate = atoi(arg);
 			break;
 
-		case 'l':
-			settings.bind = arg;
+		case 't':
+			settings.tcpbind = arg;
 			break;
 	
 		case ARG_BACKLOG:

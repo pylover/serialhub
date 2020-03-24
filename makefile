@@ -3,7 +3,7 @@ CC = gcc
 #CFLAGS = -I. -I/usr/src/linux-headers-$(KERNEL)/include
 CFLAGS = -I.
 LIBS = -lm
-OBJECTS = circularbuffer.o settings.o cli.o tty.o
+OBJECTS = circularbuffer.o networking.o settings.o cli.o tty.o
 
 serialhub: $(OBJECTS) logging.h main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
@@ -11,6 +11,7 @@ serialhub: $(OBJECTS) logging.h main.c
 cli.o: cli.c cli.h
 tty.o: tty.c tty.h
 settings.o: settings.c settings.h
+networking.o: networking.c networking.h
 circularbuffer.o: circularbuffer.c circularbuffer.h
 
 .PHONY: clean 
