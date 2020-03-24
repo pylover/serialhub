@@ -19,6 +19,7 @@ enum {
     FAILURE_EPOLLCTL = -8,
     FAILURE_EPOLLWAIT = -9,
     FAILURE_TCPACCEPT = -10,
+    FAILURE_MAXCONNECTIONS = -11,
 };
 
 #define _STR(X) #X
