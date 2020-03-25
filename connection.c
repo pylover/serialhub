@@ -53,8 +53,6 @@ int connection_registerevents(struct connection *conn) {
 }
 
 
-
-
 int tcpconnection_accept(int epollfd, int listenfd) {
 	int err, sockfd, slot;
 	struct sockaddr addr; 
