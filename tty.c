@@ -8,20 +8,20 @@
 #include <fcntl.h>
 
 
-int serialopen(char *dev, unsigned int baudrate) {
+int serialopen() {
     struct termios options;
 
-    L_INFO("DEV: %s, %d", dev, baudrate);
-    int fd = open(dev, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    L_INFO("DEV: %s, %d", settings.device, settings.baudrate);
+    int fd = open(settings.device, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd == -1) {
-        L_ERROR("Can't open serial device: %s", dev);
+        L_ERROR("Can't open serial device: %s", settings.device);
         return fd;
     }
 
     tcgetattr(fd, &options);
 
-    cfsetispeed(&options, baudrate);
-    cfsetospeed(&options, baudrate);
+    cfsetispeed(&options, settings.baudrate);
+    cfsetospeed(&options, settings.baudrate);
 
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);     /*Input*/
     options.c_oflag &= ~OPOST;                              /*Output*/

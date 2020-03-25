@@ -13,14 +13,14 @@ static struct connection* connections[MAXCONNECTIONS];
 
 static int _setnonblocking(int fd) {
 	int opts;
-	if ((opts = fcntl(fd, F_GETFL)) < 0) {
+	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
 		L_ERROR("GETFL %d failed", fd);
-		return FAILURE_SETNONBLOCKING;
+        return ERR;
 	}
 	opts = opts | O_NONBLOCK;
-	if (fcntl(fd, F_SETFL, opts) < 0) {
+	if (fcntl(fd, F_SETFL, opts) == ERR) {
 		L_ERROR("SETFL %d failed", fd);
-		return FAILURE_SETNONBLOCKING;
+        return ERR;
 	}
 	return OK;
 }
@@ -45,9 +45,9 @@ int connection_registerevents(struct connection *conn) {
 	ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
 	ev.data.ptr = conn;
 	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn->sockfd, &ev);
-	if (err == -1) {
+	if (err == ERR) {
 		L_ERROR("epoll_ctl: sockfd");
-        return FAILURE_EPOLLCTL;
+        return ERR;
 	}
 	return OK;
 }
@@ -62,25 +62,25 @@ int tcpconnection_accept(int epollfd, int listenfd) {
 	socklen_t addrlen = sizeof(struct sockaddr);
     
     slot = _getfreeslot();
-    if (slot == -1) {
-        return FAILURE_MAXCONNECTIONS;
+    if (slot == ERR) {
+        return ERR;
     }
 
 	sockfd = accept(listenfd, &addr, &addrlen);
-	if (sockfd == -1) {
-		L_ERROR("accept()");
-		return FAILURE_TCPACCEPT;
+	if (sockfd == ERR) {
+		L_ERROR("tcp accept");
+        return ERR;
 	}
     
 	err = _setnonblocking(conn->sockfd);
-    if (err < 0) {
+    if (err == ERR) {
         return err;
     }
 
     conn = malloc(sizeof(struct connection));
     if (conn == NULL) {
         L_ERROR("Cannot allocate connection memory");
-        return FAILURE_MEMALLOCATE;
+        return ERR;
     }
     
     conn->slot = slot;
@@ -91,7 +91,7 @@ int tcpconnection_accept(int epollfd, int listenfd) {
     conn->buffer.blob = malloc(BUFFERSIZE);
     if (conn->buffer.blob == NULL) {
         L_ERROR("Cannot allocate buffer memory");
-        return FAILURE_MEMALLOCATE;
+        return ERR;
     }
 
     connections[slot] = conn;

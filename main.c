@@ -46,9 +46,10 @@ int main(int argc, char **argv) {
     cliparse(argc, argv);
     
     // Open serial port
-    serialfd = serialopen(settings.device, settings.baudrate);
+    serialfd = serialopen();
     if (serialfd == -1) {
-        exit(FAILURE_SERIALDEVICE);
+        L_ERROR("Cannot open serial device: %s", settings.device);
+        exit(EXIT_FAILURE);
     }
 
 	// Listen on tcp port
@@ -60,23 +61,23 @@ int main(int argc, char **argv) {
     epollfd = epoll_create1(0);
     if (epollfd < 0) {
         L_ERROR("Cannot create epoll file descriptor");
-        exit(FAILURE_EPOLLFD);
+        exit(EXIT_FAILURE);
     }
     
     // Register epoll events
     tcplistenevent.events = EPOLLIN | EPOLLOUT;
     tcplistenevent.data.fd = tcplistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &tcplistenevent) == -1) {
-        L_ERROR("epoll_ctl: tcplisten");
-        exit(FAILURE_EPOLLCTL);
+        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
+        exit(EXIT_FAILURE);
     }
 
     char buff[1024];
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);
         if (fdcount == -1) {
-            L_ERROR("epoll_wait:");
-            exit(FAILURE_EPOLLWAIT);
+            L_ERROR("epoll_wait returned: %d", fdcount);
+            exit(EXIT_FAILURE);
         }
         
         for (i = 0; i < fdcount; i++) {
@@ -87,6 +88,5 @@ int main(int argc, char **argv) {
             }
         }
     }
-    printf("Hello: %d\n", serialfd);
     return 0;
 }

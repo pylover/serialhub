@@ -68,13 +68,14 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 void cliparse(int argc, char **argv) {
 	int err = argp_parse(&argp, argc, argv, 0, 0, 0);
 	if (err) {
-        exit(FAILURE_CLIPARSE);
+        L_ERROR("Cannot parse arguments");
+        exit(EXIT_FAILURE);
 	}
 
 	if (settings.device == NULL) {
         L_ERROR("Please provide device:");
         argp_help(&argp, stderr, ARGP_HELP_USAGE, argv[0]);
-        exit(FAILURE_CLIPARSE);
+        exit(EXIT_FAILURE);
 	}
 }
 

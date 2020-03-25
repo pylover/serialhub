@@ -7,23 +7,13 @@
 
 
 #define OK  0
+#define ERR -1
 #define CHUNKSIZE   1024
 
 
-enum {
-    FAILURE_CLIPARSE = -1,
-    FAILURE_SERIALDEVICE = -2,
-    FAILURE_MEMALLOCATE = -3,
-    FAILURE_TCPLISTEN = -4,
-    FAILURE_TCPBIND = -5,
-    FAILURE_INVALIDTCPADDRESS = -6,
-    FAILURE_EPOLLFD = -7,
-    FAILURE_EPOLLCTL = -8,
-    FAILURE_EPOLLWAIT = -9,
-    FAILURE_TCPACCEPT = -10,
-    FAILURE_MAXCONNECTIONS = -11,
-    FAILURE_SETNONBLOCKING = -12,
-};
+extern int errno;
+
+
 
 #define _STR(X) #X
 #define STR(X) _STR(X)
@@ -32,8 +22,8 @@ enum {
 #define LOG(file, ...) do {	\
 	fprintf(file, __VA_ARGS__); \
 	fprintf(file, "\n" ); \
-    if (file == stderr) { \
-        fprintf(file, "%s", strerror(errno)); \
+    if ((file == stderr) && errno) { \
+        fprintf(file, "Additional info: %s", strerror(errno)); \
     } \
 	fflush(file); \
 } while(0)

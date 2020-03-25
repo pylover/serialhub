@@ -19,20 +19,20 @@ int tcp_bindandlisten(struct sockaddr_in *listenaddr) {
 		listenaddr->sin_addr.s_addr = htonl(INADDR_ANY);
 	} 
     else if(inet_pton(AF_INET, settings.tcpbind, &listenaddr->sin_addr)<=0) {
-		//errno = EFAULT;
-		return FAILURE_INVALIDTCPADDRESS;
+        L_ERROR("Invalid address: %s", settings.tcpbind);
+        return ERR;
 	}
 	listenaddr->sin_port = htons(settings.tcpport); 
 	err = bind(listenfd, (struct sockaddr*)listenaddr, sizeof(*listenaddr)); 
 	if (err) {
 		L_ERROR("Cannot bind on: %s", inet_ntoa(listenaddr->sin_addr));
-        return FAILURE_TCPBIND;
+        return ERR;
 	}
 	
 	err = listen(listenfd, settings.tcpbacklog); 
 	if (err) {
 		L_ERROR("Cannot listen on: %s", inet_ntoa(listenaddr->sin_addr));
-        return FAILURE_TCPLISTEN;
+        return ERR;
 	}
 	L_INFO(
 		"Listening on %s:%d", 

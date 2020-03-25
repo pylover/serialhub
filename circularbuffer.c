@@ -11,10 +11,10 @@ int buffer_readinto(struct ringbuffer *b, int fd) {
 
     while (1) {
         result = read(fd, buff, CHUNKSIZE);
-        if (result <= 0) {
+        if (result == -1) {
             return result;
         }
-        
+        // TODO: Zero result is end of file? 
         //result = buffer_put(b, buff, result);
         // TODO: continue here
     }
