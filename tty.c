@@ -53,13 +53,20 @@ int termiosbaudrate(int b) {
 
         case 4000000:
             return B4000000;
-         
+        
+        default:
+            return ERR;
     }
 }
 
 
 int serialopen() {
     struct termios options;
+    int baudrate = termiosbaudrate(settings.baudrate);
+    if (baudrate == ERR) {
+        L_ERROR("Invalid baudrate: %d", settings.baudrate);
+        return ERR;
+    }
 
     L_INFO("DEV: %s, %d", settings.device, settings.baudrate);
     int fd = open(settings.device, O_RDWR); // | O_NDELAY); // | O_NOCTTY | O_NONBLOCK);
@@ -68,11 +75,9 @@ int serialopen() {
         return fd;
     }
 
-    speed_t b = B115200;
     tcgetattr(fd, &options);
-    // TODO: baudrate validation
-    cfsetispeed(&options, termiosbaudrate(settings.baudrate));
-    cfsetospeed(&options, termiosbaudrate(settings.baudrate));
+    cfsetispeed(&options, baudrate);
+    cfsetospeed(&options, baudrate);
 
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);     /*Input*/
     options.c_oflag &= ~OPOST;                              /*Output*/

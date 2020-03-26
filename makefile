@@ -1,9 +1,9 @@
 CC = gcc
 #KERNEL = $(shell uname -r)
 #CFLAGS = -I. -I/usr/src/linux-headers-$(KERNEL)/include
-CFLAGS = -I.
+CFLAGS =-Wall -I.
 LIBS = -lm
-OBJECTS = circularbuffer.o common.o cli.o tty.o connection.o
+OBJECTS = common.o cli.o tty.o connection.o
 
 serialhub: $(OBJECTS) main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
@@ -12,7 +12,6 @@ common.o: common.c common.h
 cli.o: cli.c cli.h common.h 
 tty.o: tty.c tty.h common.h 
 connection.o: connection.c connection.h circularbuffer.h common.h 
-circularbuffer.o: circularbuffer.c circularbuffer.h common.h
 
 .PHONY: clean 
 clean:
