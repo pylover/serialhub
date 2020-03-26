@@ -17,8 +17,10 @@ struct connection{
 };
 
 
-int tcpconnection_accept(int epollfd, int listenfd);
 void connection_broadcast(const char *buff, int len);
 int connection_close(struct connection *conn);
+
+int tcpconnection_listen(struct sockaddr_in *listenaddr);
+int tcpconnection_accept(int epollfd, int listenfd);
 
 #endif

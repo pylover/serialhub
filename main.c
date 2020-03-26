@@ -3,7 +3,6 @@
 #include "settings.h"
 #include "tty.h"
 #include "cli.h"
-#include "networking.h"
 #include "connection.h"
 
 #include <stdio.h>
@@ -30,19 +29,17 @@ static int _process_serialio(struct epoll_event *e) {
             L_ERROR("Serial file closed");
             return ERR;
         }
-        L_RAW("%.*s", bytes, buff);
+        //L_RAW("%.*s", bytes, buff);
         connection_broadcast(buff, bytes);
 	}
 	return OK;
 }
 
-// TODO: delete buffers and allocations
-//
+
 static int _process_connectionio(struct epoll_event *e) {
     char buff[CHUNKSIZE];
 	int err, bytes;
     struct connection *conn = (struct connection *)e->data.ptr;
-    L_INFO("Event TCP");
 	if (e->events & EPOLLIN) {
         bytes = read(conn->sockfd, buff, CHUNKSIZE);
         if (bytes <= 0) {
@@ -51,16 +48,12 @@ static int _process_connectionio(struct epoll_event *e) {
             return OK;
         }
        
-        L_INFO("RCV TCP: %.*s", bytes, buff);
         err = write(serialfd, buff, bytes);
         if (err == ERR) {
             L_ERROR("Cannot write to serial device");
             return err;
         }
 	}
-    else if (e->events & EPOLLOUT) { 
-        L_INFO("Connection write");
-    }
     // TODO: EPOLLRDHUP
 
     return OK; 
@@ -83,7 +76,7 @@ int main(int argc, char **argv) {
     }
 
 	// Listen on tcp port
-    tcplistenfd = tcp_bindandlisten(&listenaddr);
+    tcplistenfd = tcpconnection_listen(&listenaddr);
     if (tcplistenfd == ERR) {
         L_ERROR("Cannot bind tcp socket");
         exit(EXIT_FAILURE);
@@ -124,8 +117,8 @@ int main(int argc, char **argv) {
         for (i = 0; i < fdcount; i++) {
             e = &events[i];
             if (e->data.fd == tcplistenfd) {
-                // Ignoring error.
 				tcpconnection_accept(epollfd, tcplistenfd);
+                // TODO: error handling.
             }
             else if (e->data.fd == serialfd) {
                 err = _process_serialio(e);
