@@ -13,9 +13,6 @@
 #include <sys/epoll.h>
 
 
-#define MAXEVENTS  10
-
-
 static char serialblob[BUFFERSIZE];
 static struct ringbuffer serialoutbuffer = {
     serialblob,
@@ -77,9 +74,13 @@ static int _process_connectionio(struct epoll_event *e) {
             }
         }
 	}
+    else if (e->events & EPOLLOUT) { 
+    }
+    // TODO: EPOLLRDHUP
 
     return OK; 
 }
+
 
 int main(int argc, char **argv) {
     int serialfd, tcplistenfd, fdcount, err, i;

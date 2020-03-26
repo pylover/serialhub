@@ -10,7 +10,7 @@
 #include <sys/epoll.h>
 
 
-#define CONNECTIONEVENTS   ( EPOLLIN | EPOLLET | EPOLLRDHUP )
+#define CONNECTIONEVENTS   ( EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP )
 
 
 static struct connection* connections[MAXCONNECTIONS];
@@ -161,3 +161,6 @@ int connection_close(struct connection *conn) {
     free(conn);
     return OK;
 }
+
+
+

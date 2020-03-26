@@ -12,6 +12,7 @@
 /* It must be power-of-2, 2 ** n
  */
 #define BUFFERSIZE  16
+#define MAXEVENTS  10
 #define MAXCONNECTIONS  1
 #define CHUNKSIZE   BUFFERSIZE / 2
 
