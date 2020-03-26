@@ -140,7 +140,6 @@ int main(int argc, char **argv) {
             }
             else if (e->data.fd == serialfd) {
                 err = _process_serialio(e);
-                // EAGAIN, read will be blocked
                 if (err == ERR) {
                     exit(EXIT_FAILURE);
                 }
