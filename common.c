@@ -1,12 +1,14 @@
 #include "common.h"
-#include "settings.h"
 
-#include <stdlib.h>
 
 volatile struct Settings settings = {
-	DEFAULT_BIND, 
     NULL,
     DEFAULT_BAUDRATE,
+	DEFAULT_TCPBIND, 
 	DEFAULT_TCPPORT, 
-	DEFAULT_BACKLOG,
+	DEFAULT_TCPBACKLOG,
+    DEFAULT_UNIXFILE,
+    DEFAULT_UNIXBACKLOG
 };
+
+

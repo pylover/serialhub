@@ -1,6 +1,5 @@
 
 #include "common.h"
-#include "settings.h"
 #include "tty.h"
 #include "cli.h"
 #include "connection.h"
@@ -61,9 +60,8 @@ static int _process_connectionio(struct epoll_event *e) {
 
 
 int main(int argc, char **argv) {
-    int tcplistenfd, fdcount, err, i;
+    int tcplistenfd, unixlistenfd, fdcount, err, i;
     struct epoll_event ev, events[MAXEVENTS], *e;
-	struct sockaddr_in listenaddr;
     
     // Parse command line arguments
     cliparse(argc, argv);
@@ -76,12 +74,19 @@ int main(int argc, char **argv) {
     }
 
 	// Listen on tcp port
-    tcplistenfd = tcpconnection_listen(&listenaddr);
+    tcplistenfd = tcpconnection_listen();
     if (tcplistenfd == ERR) {
         L_ERROR("Cannot bind tcp socket");
         exit(EXIT_FAILURE);
     }
     
+    // Listen on unix domain socket
+    unixlistenfd = unixconnection_listen();
+    if (unixlistenfd == ERR) {
+        L_ERROR("Cannot bind unix domain socket");
+        exit(EXIT_FAILURE);
+    }
+
     // Create epoll instance
     epollfd = epoll_create1(0);
     if (epollfd < 0) {
@@ -90,11 +95,20 @@ int main(int argc, char **argv) {
     }
     
     // Register epoll events
+    
     // tcplisten
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = tcplistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &ev) == ERR) {
         L_ERROR("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
+        exit(EXIT_FAILURE);
+    }
+    
+    // unixlisten
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = unixlistenfd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unixlistenfd, &ev) == ERR) {
+        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
         exit(EXIT_FAILURE);
     }
 
@@ -117,7 +131,11 @@ int main(int argc, char **argv) {
         for (i = 0; i < fdcount; i++) {
             e = &events[i];
             if (e->data.fd == tcplistenfd) {
-				tcpconnection_accept(epollfd, tcplistenfd);
+				tcpconnection_accept(tcplistenfd);
+                // TODO: error handling.
+            }
+            else if (e->data.fd == unixlistenfd) {
+				unixconnection_accept(unixlistenfd);
                 // TODO: error handling.
             }
             else if (e->data.fd == serialfd) {

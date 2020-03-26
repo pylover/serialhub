@@ -1,7 +1,6 @@
 
 #include "tty.h"
 #include "common.h"
-#include "settings.h"
 
 #include <stdio.h>
 #include <termios.h>

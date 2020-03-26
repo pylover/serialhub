@@ -39,6 +39,26 @@ extern int errno;
 #define L_INFO( ... ) LOG(stdout, 1, __VA_ARGS__)
 #define L_ERROR( ... ) LOG(stderr, 1, __VA_ARGS__)
 
+#define DEFAULT_TCPPORT     5600
+#define DEFAULT_BAUDRATE    115200
+#define DEFAULT_TCPBIND     "0.0.0.0"
+#define DEFAULT_TCPBACKLOG  1
+#define DEFAULT_UNIXFILE    "serialhub.socket"
+#define DEFAULT_UNIXBACKLOG 1
+
+
+struct Settings {
+	char *device;
+    unsigned int baudrate;
+	char *tcpbind;
+	unsigned int tcpport; 
+	unsigned int tcpbacklog;
+    char *unixfile;
+    unsigned int unixbacklog;
+};
+
+
 volatile int epollfd;
+volatile struct Settings settings;
 
 #endif
