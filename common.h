@@ -26,9 +26,11 @@ extern int errno;
 #define STR(X) _STR(X)
 
 
-#define LOG(file, ...) do {	\
+#define LOG(file, r, ...) do {	\
 	fprintf(file, __VA_ARGS__); \
-	fprintf(file, "\n" ); \
+    if (r) { \
+	    fprintf(file, "\n" ); \
+    } \
     if ((file == stderr) && errno) { \
         fprintf(file, "Additional info: %s\n", strerror(errno)); \
     } \
@@ -36,8 +38,9 @@ extern int errno;
 } while(0)
  
 
-#define L_INFO( ... ) LOG(stdout, __VA_ARGS__)
-#define L_ERROR( ... ) LOG(stderr, __VA_ARGS__)
+#define L_RAW( ... ) LOG(stdout, 0, __VA_ARGS__)
+#define L_INFO( ... ) LOG(stdout, 1, __VA_ARGS__)
+#define L_ERROR( ... ) LOG(stderr, 1, __VA_ARGS__)
 
 volatile int epollfd;
 

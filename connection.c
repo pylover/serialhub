@@ -10,25 +10,25 @@
 #include <sys/epoll.h>
 
 
-#define CONNECTIONEVENTS   ( EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP )
+#define CONNECTIONEVENTS   ( EPOLLIN | EPOLLRDHUP )
 
 
 static struct connection* connections[MAXCONNECTIONS];
 
 
-static int _setnonblocking(int fd) {
-	int opts;
-	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
-		L_ERROR("GETFL %d failed", fd);
-        return ERR;
-	}
-	opts = opts | O_NONBLOCK;
-	if (fcntl(fd, F_SETFL, opts) == ERR) {
-		L_ERROR("SETFL %d failed", fd);
-        return ERR;
-	}
-	return OK;
-}
+//static int _setnonblocking(int fd) {
+//	int opts;
+//	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
+//		L_ERROR("GETFL %d failed", fd);
+//        return ERR;
+//	}
+//	opts = opts | O_NONBLOCK;
+//	if (fcntl(fd, F_SETFL, opts) == ERR) {
+//		L_ERROR("SETFL %d failed", fd);
+//        return ERR;
+//	}
+//	return OK;
+//}
 
 
 static int _getfreeslot() {
@@ -91,11 +91,11 @@ int tcpconnection_accept(int epollfd, int listenfd) {
         return ERR;
 	}
     
-	err = _setnonblocking(sockfd);
-    if (err == ERR) {
-        L_ERROR("Cannot set nonblocking on tcp socket");
-        return err;
-    }
+//	err = _setnonblocking(sockfd);
+//    if (err == ERR) {
+//        L_ERROR("Cannot set nonblocking on tcp socket");
+//        return err;
+//    }
 
     conn = malloc(sizeof(struct connection));
     if (conn == NULL) {
@@ -128,13 +128,17 @@ void connection_broadcast(const char *buff, int len) {
             break;
         }
         L_INFO("Connection found: %d", i);
-        err = bufferput(&(connections[i]->outbuffer), buff, len);
-        if (err == ERR) {
-            // Buffer full
-            if (errno == ENOBUFS) {
-                L_ERROR("TCP Buffer full, closing connection");
-                connection_close(connections[i]);
-            }
+        //err = bufferput(&(connections[i]->outbuffer), buff, len);
+        //if (err == ERR) {
+        //    // Buffer full
+        //    if (errno == ENOBUFS) {
+        //        L_ERROR("TCP Buffer full, closing connection");
+        //        connection_close(connections[i]);
+        //    }
+        //}
+        err = write(connections[i]->sockfd, buff, len);
+        if (err <= 0) {
+            connection_close(connections[i]);
         }
     }
 }

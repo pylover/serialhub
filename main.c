@@ -27,25 +27,17 @@ static int _process_serialio(struct epoll_event *e) {
 	int err, bytes, fd;
     fd = e->data.fd;
 	if (e->events & EPOLLIN) {
-        while (1) {
-            bytes = read(fd, buff, CHUNKSIZE);
-            if (bytes == ERR) {
-                if (errno == EAGAIN) {
-                    //L_ERROR("Eagain");
-                    break;
-                }
-                L_ERROR("Cannot read from serial interface");
-                return bytes;
-            }
-            else if (bytes == 0) {
-                L_ERROR("Serial file closed");
-                return ERR;
-            }
-            //printf("%d, %.*s\n", bytes, bytes, buff);
-            printf("%.*s", bytes, buff);
-            fflush(stdout);
-            connection_broadcast(buff, bytes);
+        bytes = read(fd, buff, CHUNKSIZE);
+        if (bytes == ERR) {
+            L_ERROR("Cannot read from serial interface");
+            return bytes;
         }
+        else if (bytes == 0) {
+            L_ERROR("Serial file closed");
+            return ERR;
+        }
+        L_RAW("%.*s", bytes, buff);
+        connection_broadcast(buff, bytes);
 	}
 	return OK;
 }
@@ -55,6 +47,7 @@ static int _process_connectionio(struct epoll_event *e) {
     char buff[CHUNKSIZE];
 	int err, bytes, fd;
     fd = e->data.fd;
+    L_INFO("Event TCP");
 	if (e->events & EPOLLIN) {
         while (1) {
             bytes = read(fd, buff, CHUNKSIZE);
@@ -75,6 +68,7 @@ static int _process_connectionio(struct epoll_event *e) {
         }
 	}
     else if (e->events & EPOLLOUT) { 
+        L_INFO("Connection write");
     }
     // TODO: EPOLLRDHUP
 
@@ -113,7 +107,7 @@ int main(int argc, char **argv) {
     
     // Register epoll events
     // tcplisten
-    ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+    ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = tcplistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &ev) == ERR) {
         L_ERROR("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
@@ -121,7 +115,7 @@ int main(int argc, char **argv) {
     }
 
     // serialport
-    ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+    ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = serialfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serialfd, &ev) == ERR) {
         L_ERROR("epoll_ctl: EPOLL_CTL_ADD, serial interface");
@@ -148,7 +142,8 @@ int main(int argc, char **argv) {
                 if (err == ERR) {
                     exit(EXIT_FAILURE);
                 }
-            } else if (e->data.fd == tcplistenfd) {
+            } 
+            else {
                 err = _process_connectionio(e);
                 if (err == ERR) {
                     exit(EXIT_FAILURE);
