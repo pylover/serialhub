@@ -21,5 +21,9 @@ clean:
 
 .PHONY: test 
 test: serialhub
+	./serialhub /dev/ttyUSB0
+
+.PHONY: t 
+t: serialhub
 	./serialhub /dev/ttyACM0
 
