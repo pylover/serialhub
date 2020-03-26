@@ -1,4 +1,5 @@
 #include "common.h"
+#include "circularbuffer.h"
 #include "connection.h"
 
 #include <stdlib.h>
@@ -11,19 +12,19 @@
 static struct connection* connections[MAXCONNECTIONS];
 
 
-static int _setnonblocking(int fd) {
-	int opts;
-	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
-		L_ERROR("GETFL %d failed", fd);
-        return ERR;
-	}
-	opts = opts | O_NONBLOCK;
-	if (fcntl(fd, F_SETFL, opts) == ERR) {
-		L_ERROR("SETFL %d failed", fd);
-        return ERR;
-	}
-	return OK;
-}
+//static int _setnonblocking(int fd) {
+//	int opts;
+//	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
+//		L_ERROR("GETFL %d failed", fd);
+//        return ERR;
+//	}
+//	opts = opts | O_NONBLOCK;
+//	if (fcntl(fd, F_SETFL, opts) == ERR) {
+//		L_ERROR("SETFL %d failed", fd);
+//        return ERR;
+//	}
+//	return OK;
+//}
 
 
 
@@ -70,10 +71,10 @@ int tcpconnection_accept(int epollfd, int listenfd) {
         return ERR;
 	}
     
-	err = _setnonblocking(conn->sockfd);
-    if (err == ERR) {
-        return err;
-    }
+//	err = _setnonblocking(conn->sockfd);
+//    if (err == ERR) {
+//        return err;
+//    }
 
     conn = malloc(sizeof(struct connection));
     if (conn == NULL) {
@@ -85,9 +86,9 @@ int tcpconnection_accept(int epollfd, int listenfd) {
     conn->sockfd = sockfd;
     conn->type = CNTYPE_TCP;
     conn->address = (struct sockaddr_in*) &addr;
-    conn->buffer.size = BUFFERSIZE;
-    conn->buffer.blob = malloc(BUFFERSIZE);
-    if (conn->buffer.blob == NULL) {
+    conn->outbuffer.size = BUFFERSIZE;
+    conn->outbuffer.blob = malloc(BUFFERSIZE);
+    if (conn->outbuffer.blob == NULL) {
         L_ERROR("Cannot allocate buffer memory");
         return ERR;
     }
@@ -98,7 +99,24 @@ int tcpconnection_accept(int epollfd, int listenfd) {
 
 
 void tcpconnection_dispose(struct connection *conn) {
-    free(conn->buffer.blob);
+    free(conn->outbuffer.blob);
     free(conn);
+}
+
+
+void connection_broadcast(const char *buff, int len) {
+    int i, err;
+    for (i = 0; i < MAXCONNECTIONS; i++) {
+        if (connections[i] == NULL) {
+            break;
+        }
+        err = bufferput(&(connections[i]->outbuffer), buff, len);
+        if (err == ERR) {
+            // Buffer full
+            if (errno == ENOBUFS) {
+                // TODO: CLose the connection
+            }
+        }
+    }
 }
 

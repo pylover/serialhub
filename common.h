@@ -23,7 +23,7 @@ extern int errno;
 	fprintf(file, __VA_ARGS__); \
 	fprintf(file, "\n" ); \
     if ((file == stderr) && errno) { \
-        fprintf(file, "Additional info: %s", strerror(errno)); \
+        fprintf(file, "Additional info: %s\n", strerror(errno)); \
     } \
 	fflush(file); \
 } while(0)

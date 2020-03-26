@@ -17,7 +17,7 @@
 
 
 static char serialblob[BUFFERSIZE];
-static struct ringbuffer serialbuffer = {
+static struct ringbuffer serialoutbuffer = {
     serialblob,
     0,
     0,
@@ -25,21 +25,54 @@ static struct ringbuffer serialbuffer = {
 };
 
 
-static int _process_serial_interface_io(struct epoll_event e) {
-	int err = OK;
-	if (e.events & EPOLLIN) {
-		err = buffer_readinto(&serialbuffer, e.data.fd);
-        // buffer full
-        // EAGAIN, read will be blocked
-        // TODO: continue here
+static int _process_serialio(struct epoll_event *e) {
+    char buff[CHUNKSIZE];
+	int err, bytes, fd;
+    fd = e->data.fd;
+	if (e->events & EPOLLIN) {
+        bytes = read(fd, buff, CHUNKSIZE);
+        if (bytes == ERR) {
+            L_ERROR("Cannot read from serial interface");
+            return bytes;
+        }
+        
+        printf("%d, %.*s", bytes, bytes, buff);
+        //connection_broadcast(buff, bytes);
 	}
-	return err;
+	return OK;
 }
 
 
+static int _process_connectionio(struct epoll_event *e) {
+    char buff[CHUNKSIZE];
+	int err, bytes, fd;
+    fd = e->data.fd;
+	if (e->events & EPOLLIN) {
+        while (1) {
+            bytes = read(fd, buff, CHUNKSIZE);
+            if (bytes == ERR) {
+                if (errno == EAGAIN) {
+                    L_ERROR("EAGAIN TCP READ");
+                    break;
+                }
+                L_ERROR("Cannot read from tcp socket");
+                return bytes;
+            }
+           
+            printf("RCV TCP: %.*s", bytes, buff);
+            err = bufferput(&serialoutbuffer, buff, bytes);
+            if (err == ERR) {
+                return err;
+            }
+        }
+	}
+
+    return OK; 
+}
+
 int main(int argc, char **argv) {
-    int serialfd, tcplistenfd, fdcount, i;
-    struct epoll_event tcplistenevent, events[MAXEVENTS], *e;
+    int serialfd, tcplistenfd, fdcount, err, i;
+    struct epoll_event ev, events[MAXEVENTS], *e;
 	struct sockaddr_in listenaddr;
     
     // Parse command line arguments
@@ -54,7 +87,9 @@ int main(int argc, char **argv) {
 
 	// Listen on tcp port
     tcplistenfd = tcp_bindandlisten(&listenaddr);
-    if (tcplistenfd < 0) {
+    if (tcplistenfd == ERR) {
+        L_ERROR("Cannot bind tcp socket");
+        exit(EXIT_FAILURE);
     }
     
     // Create epoll instance
@@ -65,10 +100,19 @@ int main(int argc, char **argv) {
     }
     
     // Register epoll events
-    tcplistenevent.events = EPOLLIN | EPOLLOUT;
-    tcplistenevent.data.fd = tcplistenfd;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &tcplistenevent) == -1) {
+    // tcplisten
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = tcplistenfd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &ev) == ERR) {
         L_ERROR("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // serialport
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = serialfd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serialfd, &ev) == ERR) {
+        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, serial interface");
         exit(EXIT_FAILURE);
     }
 
@@ -85,6 +129,18 @@ int main(int argc, char **argv) {
             if (e->data.fd == tcplistenfd) {
                 // Ignoring error.
 				tcpconnection_accept(epollfd, tcplistenfd);
+            }
+            else if (e->data.fd == serialfd) {
+                err = _process_serialio(e);
+                // EAGAIN, read will be blocked
+                if (err == ERR) {
+                    exit(EXIT_FAILURE);
+                }
+            } else if (e->data.fd == tcplistenfd) {
+                err = _process_connectionio(e);
+                if (err == ERR) {
+                    exit(EXIT_FAILURE);
+                }
             }
         }
     }

@@ -2,21 +2,24 @@
 #include "common.h"
 #include "circularbuffer.h"
 
-#include <unistd.h>
+
+void putone(struct ringbuffer *buff, char c) {
+    buff->blob[buff->head] = c;
+    buff->head = (buff->head + 1) & (buff->size - 1);
+}
 
 
-int buffer_readinto(struct ringbuffer *b, int fd) {
-    char buff[CHUNKSIZE];
-    int result;
-
-    while (1) {
-        result = read(fd, buff, CHUNKSIZE);
-        if (result == -1) {
-            return result;
-        }
-        // TODO: Zero result is end of file? 
-        //result = buffer_put(b, buff, result);
-        // TODO: continue here
+int bufferput(struct ringbuffer *buff, const char *data, int len) {
+    int i, err;
+    if (bufferspace(buff) < len) {
+        L_ERROR("Buffer full");
+        errno = ENOBUFS;
+        return ERR;
+    }
+    for (i = 0; i < len; i++) {
+        putone(buff, data[i]);
     }
     return OK;
 }
+
+

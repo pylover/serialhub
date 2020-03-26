@@ -12,7 +12,7 @@ int serialopen() {
     struct termios options;
 
     L_INFO("DEV: %s, %d", settings.device, settings.baudrate);
-    int fd = open(settings.device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    int fd = open(settings.device, O_RDWR | O_NOCTTY); // | O_NONBLOCK);
     if (fd == -1) {
         L_ERROR("Can't open serial device: %s", settings.device);
         return fd;

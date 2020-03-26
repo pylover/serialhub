@@ -15,7 +15,7 @@ enum connectiontype {
 
 
 struct connection{
-    struct ringbuffer buffer;
+    struct ringbuffer outbuffer;
     int sockfd;
     enum connectiontype type;
     struct sockaddr_in *address;
@@ -24,5 +24,6 @@ struct connection{
 
 
 int tcpconnection_accept(int epollfd, int listenfd);
+void connection_broadcast(const char *buff, int len);
 
 #endif
