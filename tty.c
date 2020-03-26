@@ -53,7 +53,7 @@ int termiosbaudrate(int b) {
 
         case 4000000:
             return B4000000;
-        
+         
     }
 }
 
@@ -70,6 +70,7 @@ int serialopen() {
 
     speed_t b = B115200;
     tcgetattr(fd, &options);
+    // TODO: baudrate validation
     cfsetispeed(&options, termiosbaudrate(settings.baudrate));
     cfsetospeed(&options, termiosbaudrate(settings.baudrate));
 

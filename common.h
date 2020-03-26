@@ -8,7 +8,13 @@
 
 #define OK  0
 #define ERR -1
-#define CHUNKSIZE   1024
+
+/* It must be power-of-2, 2 ** n
+ */
+#define BUFFERSIZE  16
+#define MAXCONNECTIONS  1
+#define CHUNKSIZE   BUFFERSIZE / 2
+
 
 
 extern int errno;

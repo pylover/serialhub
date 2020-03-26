@@ -47,7 +47,7 @@ static int _process_serialio(struct epoll_event *e) {
             //printf("%d, %.*s\n", bytes, bytes, buff);
             printf("%.*s", bytes, buff);
             fflush(stdout);
-            //connection_broadcast(buff, bytes);
+            connection_broadcast(buff, bytes);
         }
 	}
 	return OK;

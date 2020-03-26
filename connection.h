@@ -4,11 +4,6 @@
 #include "circularbuffer.h"
 
 
-/* It must be power-of-2, 2 ** n
- */
-#define BUFFERSIZE  1024
-#define MAXCONNECTIONS  10
-
 enum connectiontype {  
     CNTYPE_TCP,
 }; 
@@ -25,5 +20,6 @@ struct connection{
 
 int tcpconnection_accept(int epollfd, int listenfd);
 void connection_broadcast(const char *buff, int len);
+int connection_close(struct connection *conn);
 
 #endif
