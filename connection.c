@@ -1,5 +1,4 @@
 #include "common.h"
-#include "circularbuffer.h"
 #include "connection.h"
 
 #include <stdlib.h>
@@ -132,7 +131,7 @@ int connection_add(int sockfd, struct sockaddr addr,
 
 
 int tcpconnection_accept(int listenfd) {
-	int err, sockfd;
+	int sockfd;
 	struct sockaddr addr; 
 	socklen_t addrlen = sizeof(struct sockaddr);
     
@@ -149,7 +148,7 @@ int tcpconnection_accept(int listenfd) {
 
 
 int unixconnection_accept(int listenfd) {
-	int err, sockfd;
+	int sockfd;
     struct sockaddr addr;
     
 	sockfd = accept(listenfd, NULL, NULL);

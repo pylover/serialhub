@@ -11,7 +11,7 @@ serialhub: $(OBJECTS) main.c
 common.o: common.c common.h
 cli.o: cli.c cli.h common.h 
 tty.o: tty.c tty.h common.h 
-connection.o: connection.c connection.h circularbuffer.h common.h 
+connection.o: connection.c connection.h common.h 
 
 .PHONY: clean 
 clean:

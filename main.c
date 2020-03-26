@@ -16,7 +16,7 @@ static int serialfd;
 
 static int _process_serialio(struct epoll_event *e) {
     char buff[CHUNKSIZE];
-	int err, bytes, fd;
+	int bytes, fd;
     fd = e->data.fd;
 	if (e->events & EPOLLIN) {
         bytes = read(fd, buff, CHUNKSIZE);
@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    char buff[1024];
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);
         if (fdcount == -1) {

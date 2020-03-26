@@ -1,8 +1,6 @@
 #ifndef H_CONNECTION
 #define H_CONNECTION
 
-#include "circularbuffer.h"
-
 #include <sys/socket.h>
 
 
