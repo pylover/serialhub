@@ -10,7 +10,6 @@ enum connectiontype {
 
 
 struct connection{
-    struct ringbuffer outbuffer;
     int sockfd;
     enum connectiontype type;
     struct sockaddr_in *address;

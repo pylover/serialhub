@@ -16,21 +16,6 @@
 static struct connection* connections[MAXCONNECTIONS];
 
 
-//static int _setnonblocking(int fd) {
-//	int opts;
-//	if ((opts = fcntl(fd, F_GETFL)) == ERR) {
-//		L_ERROR("GETFL %d failed", fd);
-//        return ERR;
-//	}
-//	opts = opts | O_NONBLOCK;
-//	if (fcntl(fd, F_SETFL, opts) == ERR) {
-//		L_ERROR("SETFL %d failed", fd);
-//        return ERR;
-//	}
-//	return OK;
-//}
-
-
 static int _getfreeslot() {
     int i;
     for (i = 0; i < MAXCONNECTIONS; i++) {
@@ -40,8 +25,6 @@ static int _getfreeslot() {
     }
     return -1;
 }
-
-
 
 
 int connection_registerevents(struct connection *conn) {
@@ -113,15 +96,6 @@ int tcpconnection_accept(int epollfd, int listenfd) {
     conn->sockfd = sockfd;
     conn->type = CNTYPE_TCP;
     conn->address = (struct sockaddr_in*) &addr;
-    conn->outbuffer.size = BUFFERSIZE;
-    conn->outbuffer.head = 0;
-    conn->outbuffer.tail = 0;
-    conn->outbuffer.blob = malloc(BUFFERSIZE);
-    if (conn->outbuffer.blob == NULL) {
-        L_ERROR("Cannot allocate buffer memory");
-        return ERR;
-    }
-
     connections[slot] = conn;
     return connection_registerevents(conn);
 }
@@ -159,7 +133,6 @@ int connection_close(struct connection *conn) {
    
     L_INFO("removing connection: %d", conn->slot);
     connections[conn->slot] = NULL;
-    free(conn->outbuffer.blob);
     free(conn);
     return OK;
 }

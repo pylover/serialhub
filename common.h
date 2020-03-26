@@ -11,15 +11,12 @@
 
 /* It must be power-of-2, 2 ** n
  */
-#define BUFFERSIZE  16
 #define MAXEVENTS  10
 #define MAXCONNECTIONS  2
-#define CHUNKSIZE   BUFFERSIZE / 2
-
+#define CHUNKSIZE   1024
 
 
 extern int errno;
-
 
 
 #define _STR(X) #X

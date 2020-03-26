@@ -14,13 +14,6 @@
 
 
 static int serialfd;
-static char serialblob[BUFFERSIZE];
-static struct ringbuffer serialoutbuffer = {
-    serialblob,
-    0,
-    0,
-    BUFFERSIZE
-};
 
 
 static int _process_serialio(struct epoll_event *e) {
