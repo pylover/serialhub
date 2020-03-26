@@ -13,7 +13,7 @@
  */
 #define BUFFERSIZE  16
 #define MAXEVENTS  10
-#define MAXCONNECTIONS  1
+#define MAXCONNECTIONS  2
 #define CHUNKSIZE   BUFFERSIZE / 2
 
 

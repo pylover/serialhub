@@ -80,16 +80,22 @@ int tcpconnection_accept(int epollfd, int listenfd) {
     struct connection *conn;
 	socklen_t addrlen = sizeof(struct sockaddr);
     
-    slot = _getfreeslot();
-    if (slot == ERR) {
-        return ERR;
-    }
-    
 	sockfd = accept(listenfd, &addr, &addrlen);
 	if (sockfd == ERR) {
 		L_ERROR("tcp accept");
         return ERR;
 	}
+
+    slot = _getfreeslot();
+    if (slot == ERR) {
+        // No free spot, rejecting
+        err = close(sockfd);
+        if (err == ERR) {
+            L_ERROR("Cannot close connection");
+            return err;
+        }
+        return OK;
+    }
     
 //	err = _setnonblocking(sockfd);
 //    if (err == ERR) {
@@ -128,14 +134,6 @@ void connection_broadcast(const char *buff, int len) {
             break;
         }
         L_INFO("Connection found: %d", i);
-        //err = bufferput(&(connections[i]->outbuffer), buff, len);
-        //if (err == ERR) {
-        //    // Buffer full
-        //    if (errno == ENOBUFS) {
-        //        L_ERROR("TCP Buffer full, closing connection");
-        //        connection_close(connections[i]);
-        //    }
-        //}
         err = write(connections[i]->sockfd, buff, len);
         if (err <= 0) {
             connection_close(connections[i]);

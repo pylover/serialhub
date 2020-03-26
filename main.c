@@ -13,6 +13,7 @@
 #include <sys/epoll.h>
 
 
+static int serialfd;
 static char serialblob[BUFFERSIZE];
 static struct ringbuffer serialoutbuffer = {
     serialblob,
@@ -42,29 +43,26 @@ static int _process_serialio(struct epoll_event *e) {
 	return OK;
 }
 
-
+// TODO: delete buffers and allocations
+//
 static int _process_connectionio(struct epoll_event *e) {
     char buff[CHUNKSIZE];
-	int err, bytes, fd;
-    fd = e->data.fd;
+	int err, bytes;
+    struct connection *conn = (struct connection *)e->data.ptr;
     L_INFO("Event TCP");
 	if (e->events & EPOLLIN) {
-        while (1) {
-            bytes = read(fd, buff, CHUNKSIZE);
-            if (bytes == ERR) {
-                if (errno == EAGAIN) {
-                    L_ERROR("EAGAIN TCP READ");
-                    break;
-                }
-                L_ERROR("Cannot read from tcp socket");
-                return bytes;
-            }
-           
-            printf("RCV TCP: %.*s", bytes, buff);
-            err = bufferput(&serialoutbuffer, buff, bytes);
-            if (err == ERR) {
-                return err;
-            }
+        bytes = read(conn->sockfd, buff, CHUNKSIZE);
+        if (bytes <= 0) {
+            L_ERROR("Cannot read from tcp socket");
+            connection_close(conn);
+            return OK;
+        }
+       
+        L_INFO("RCV TCP: %.*s", bytes, buff);
+        err = write(serialfd, buff, bytes);
+        if (err == ERR) {
+            L_ERROR("Cannot write to serial device");
+            return err;
         }
 	}
     else if (e->events & EPOLLOUT) { 
@@ -77,7 +75,7 @@ static int _process_connectionio(struct epoll_event *e) {
 
 
 int main(int argc, char **argv) {
-    int serialfd, tcplistenfd, fdcount, err, i;
+    int tcplistenfd, fdcount, err, i;
     struct epoll_event ev, events[MAXEVENTS], *e;
 	struct sockaddr_in listenaddr;
     
