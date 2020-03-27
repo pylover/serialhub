@@ -4,6 +4,7 @@ CC = gcc
 CFLAGS =-Wall -I.
 LIBS = -lm
 OBJECTS = common.o cli.o tty.o mux.o
+PREFIX := /usr/local
 
 serialhub: $(OBJECTS) main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
@@ -21,7 +22,6 @@ clean:
 test: serialhub
 	./serialhub /dev/ttyUSB0
 
-.PHONY: t 
-t: serialhub
-	./serialhub /dev/ttyACM0
-
+.PHONY: install
+install: serialhub
+	install -m 755 serialhub $(DESTDIR)$(PREFIX)/bin

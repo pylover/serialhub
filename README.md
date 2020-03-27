@@ -3,11 +3,19 @@
 Forward TCP and Unix connections to serial interface.
 
 
+### Install
+
 ```bash
 make
-./serialhub /dev/ttyUSB0  # Default baudrate: 115200
-./serialhub --baudrate 9600 /dev/ttyUSB0
-./serialhub --tcpport 3000 --unixfile /tmp/serialhub.s /dev/ttyUSB0
+sudo make install
+```
+
+### Quickstart
+
+```bash
+serialhub /dev/ttyUSB0  # Default baudrate: 115200
+serialhub --baudrate 9600 /dev/ttyUSB0
+serialhub --tcpport 3000 --unixfile /tmp/serialhub.s /dev/ttyUSB0
 ```
 
 #### Help
@@ -34,3 +42,38 @@ for any corresponding short options.
 
 Report bugs to http://github.com/pylover/serialhub.
 ```
+
+
+### Systemd
+
+Create a file named `/etc/systemd/system/serialhub.service`.
+
+```systemd
+[Unit]
+Description=Serial port multiplexer
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/serialhub --baudrate 115200 /dev/ttyAMA0
+Restart=on-failure
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+Then:
+
+```bash
+systemctl daemon-reload
+systemctl enable serialhub.service
+serivce serialhub start
+```
+
+Check the service using:
+
+```bash
+ss -lnp | grep serialhub
+```
+
