@@ -15,16 +15,16 @@ static char args_doc[] = "DEVICE";
 
 /* Options definition */
 static struct argp_option options[] = {
-	{"port", 'p', "PORT", 0, 
-        "Listen port. default: " STR(DEFAULT_TCPPORT)},
 	{"baudrate", 'b', "BAUDRATE", 0, 
         "Baudrate, default: " STR(DEFAULT_BAUDRATE)},
+	{"tcpport", 'p', "PORT", 0, 
+        "Listen port. default: " STR(DEFAULT_TCPPORT)},
 	{"tcpbacklog", ARG_TCPBACKLOG, "TCP_BACKLOG", 0, 
 		"TCP backlog, default: " STR(DEFAULT_TCPBACKLOG) ", see listen(2)"},
-	{"unixbacklog", ARG_UNIXBACKLOG, "UNIX_BACKLOG", 0, 
-		"Unix socket  backlog, default: " STR(DEFAULT_UNIXBACKLOG) ", see listen(2)"},
 	{"tcpbind", 't', "ADDRESS", 0, 
         "Listen address for TCP. default: " DEFAULT_TCPBIND},
+	{"unixbacklog", ARG_UNIXBACKLOG, "UNIX_BACKLOG", 0, 
+		"Unix socket  backlog, default: " STR(DEFAULT_UNIXBACKLOG) ", see listen(2)"},
     {"unixfile", 'u', "UNIXFILE", 0, 
         "Unix domain socket file to listen, default: " DEFAULT_UNIXFILE},
 	{0}

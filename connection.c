@@ -251,6 +251,7 @@ int unixconnection_listen() {
         return ERR;
     }
     
+	L_INFO("Listening on unix domain socket: %s", settings.unixfile);
     return sockfd;
 }
 
