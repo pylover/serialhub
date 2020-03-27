@@ -2,7 +2,7 @@
 #include "common.h"
 #include "tty.h"
 #include "cli.h"
-#include "connection.h"
+#include "mux.h"
 
 #include <stdio.h>
 #include <stdlib.h>

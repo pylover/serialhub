@@ -1,5 +1,5 @@
 #include "common.h"
-#include "connection.h"
+#include "mux.h"
 
 #include <stdlib.h>
 #include <fcntl.h>

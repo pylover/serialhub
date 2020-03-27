@@ -3,7 +3,7 @@ CC = gcc
 #CFLAGS = -I. -I/usr/src/linux-headers-$(KERNEL)/include
 CFLAGS =-Wall -I.
 LIBS = -lm
-OBJECTS = common.o cli.o tty.o connection.o
+OBJECTS = common.o cli.o tty.o mux.o
 
 serialhub: $(OBJECTS) main.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $^
@@ -11,7 +11,7 @@ serialhub: $(OBJECTS) main.c
 common.o: common.c common.h
 cli.o: cli.c cli.h common.h 
 tty.o: tty.c tty.h common.h 
-connection.o: connection.c connection.h common.h 
+mux.o: mux.c mux.h common.h 
 
 .PHONY: clean 
 clean:
