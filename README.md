@@ -68,7 +68,7 @@ Then:
 ```bash
 systemctl daemon-reload
 systemctl enable serialhub.service
-serivce serialhub start
+service serialhub start
 ```
 
 Check the service using:
