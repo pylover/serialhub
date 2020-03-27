@@ -48,6 +48,7 @@ static int _process_connectionio(struct epoll_event *e) {
         }
        
         err = write(serialfd, buff, bytes);
+        // TODO: if err < len: exit
         if (err == ERR) {
             L_ERROR("Cannot write to serial device");
             return err;
