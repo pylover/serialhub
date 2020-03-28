@@ -36,8 +36,8 @@ void connection_broadcast(const char *buff, int len) {
             break;
         }
         err = write(connections[i]->sockfd, buff, len);
-        // TODO: if err < len: close socket
-        if (err <= 0) {
+        if (err < len) {
+            perrorf("Write failed to socket: ");
             connection_close(connections[i]);
         }
     }

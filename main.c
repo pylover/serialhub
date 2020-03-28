@@ -95,8 +95,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
    
-
-
     /* Main Loop */
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);

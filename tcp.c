@@ -40,11 +40,7 @@ int tcpconnection_listen() {
 		perrorf("Cannot listen on: %s", inet_ntoa(listenaddr.sin_addr));
         return ERR;
 	}
-	printfln(
-		"Listening on %s:%d", 
-		inet_ntoa(listenaddr.sin_addr),
-		ntohs(listenaddr.sin_port)
-	);
+    printsocket("Listening on: ", listenaddr);
 
     // epoll events
     ev.events = EPOLLIN | EPOLLOUT;
@@ -88,5 +84,4 @@ int tcpconnection_accept(int listenfd) {
     }
     return OK;
 }
-
 

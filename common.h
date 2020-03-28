@@ -16,6 +16,11 @@
 #define CHUNKSIZE   1024
 
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
 extern int errno;
 
 
@@ -36,6 +41,9 @@ extern int errno;
 
 #define printfln( ... ) LOG(stdout, __VA_ARGS__)
 #define perrorf( ... ) LOG(stderr, __VA_ARGS__)
+#define printsocket(m, a) \
+    printf("%s%s:%d\n", m, inet_ntoa(a.sin_addr), ntohs(a.sin_port))
+
 
 #define DEFAULT_TCPPORT     5600
 #define DEFAULT_BAUDRATE    115200
