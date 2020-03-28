@@ -64,14 +64,14 @@ int serialopen() {
     struct termios options;
     int baudrate = termiosbaudrate(settings.baudrate);
     if (baudrate == ERR) {
-        L_ERROR("Invalid baudrate: %d", settings.baudrate);
+        perrorf("Invalid baudrate: %d", settings.baudrate);
         return ERR;
     }
 
-    L_INFO("DEV: %s, %d", settings.device, settings.baudrate);
+    printfln("DEV: %s, %d", settings.device, settings.baudrate);
     int fd = open(settings.device, O_RDWR); // | O_NDELAY); // | O_NOCTTY | O_NONBLOCK);
     if (fd == -1) {
-        L_ERROR("Can't open serial device: %s", settings.device);
+        perrorf("Can't open serial device: %s", settings.device);
         return fd;
     }
 

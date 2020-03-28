@@ -21,11 +21,11 @@ static int _process_serialio(struct epoll_event *e) {
 	if (e->events & EPOLLIN) {
         bytes = read(fd, buff, CHUNKSIZE);
         if (bytes == ERR) {
-            L_ERROR("Cannot read from serial interface");
+            perrorf("Cannot read from serial interface");
             return bytes;
         }
         else if (bytes == 0) {
-            L_ERROR("Serial file closed");
+            perrorf("Serial file closed");
             return ERR;
         }
         //L_RAW("%.*s", bytes, buff);
@@ -42,7 +42,7 @@ static int _process_connectionio(struct epoll_event *e) {
 	if (e->events & EPOLLIN) {
         bytes = read(conn->sockfd, buff, CHUNKSIZE);
         if (bytes <= 0) {
-            L_ERROR("Cannot read from tcp socket");
+            perrorf("Cannot read from tcp socket");
             connection_close(conn);
             return OK;
         }
@@ -50,7 +50,7 @@ static int _process_connectionio(struct epoll_event *e) {
         err = write(serialfd, buff, bytes);
         // TODO: if err < len: exit
         if (err == ERR) {
-            L_ERROR("Cannot write to serial device");
+            perrorf("Cannot write to serial device");
             return err;
         }
 	}
@@ -70,28 +70,28 @@ int main(int argc, char **argv) {
     // Open serial port
     serialfd = serialopen();
     if (serialfd == -1) {
-        L_ERROR("Cannot open serial device: %s", settings.device);
+        perrorf("Cannot open serial device: %s", settings.device);
         exit(EXIT_FAILURE);
     }
 
 	// Listen on tcp port
     tcplistenfd = tcpconnection_listen();
     if (tcplistenfd == ERR) {
-        L_ERROR("Cannot bind tcp socket");
+        perrorf("Cannot bind tcp socket");
         exit(EXIT_FAILURE);
     }
     
     // Listen on unix domain socket
     unixlistenfd = unixconnection_listen();
     if (unixlistenfd == ERR) {
-        L_ERROR("Cannot bind unix domain socket");
+        perrorf("Cannot bind unix domain socket");
         exit(EXIT_FAILURE);
     }
 
     // Create epoll instance
     epollfd = epoll_create1(0);
     if (epollfd < 0) {
-        L_ERROR("Cannot create epoll file descriptor");
+        perrorf("Cannot create epoll file descriptor");
         exit(EXIT_FAILURE);
     }
     
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = tcplistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &ev) == ERR) {
-        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
         exit(EXIT_FAILURE);
     }
     
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = unixlistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unixlistenfd, &ev) == ERR) {
-        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
         exit(EXIT_FAILURE);
     }
 
@@ -117,14 +117,14 @@ int main(int argc, char **argv) {
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = serialfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serialfd, &ev) == ERR) {
-        L_ERROR("epoll_ctl: EPOLL_CTL_ADD, serial interface");
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, serial interface");
         exit(EXIT_FAILURE);
     }
 
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);
         if (fdcount == -1) {
-            L_ERROR("epoll_wait returned: %d", fdcount);
+            perrorf("epoll_wait returned: %d", fdcount);
             exit(EXIT_FAILURE);
         }
         

@@ -19,15 +19,14 @@
 extern int errno;
 
 
+/* Used to create string literal from integer during preprocess. */
 #define _STR(X) #X
 #define STR(X) _STR(X)
 
 
-#define LOG(file, r, ...) do {	\
+#define LOG(file, ...) do {	\
 	fprintf(file, __VA_ARGS__); \
-    if (r) { \
-	    fprintf(file, "\n" ); \
-    } \
+	fprintf(file, "\n" ); \
     if ((file == stderr) && errno) { \
         fprintf(file, "Additional info: %s\n", strerror(errno)); \
     } \
@@ -35,9 +34,8 @@ extern int errno;
 } while(0)
  
 
-#define L_RAW( ... ) LOG(stdout, 0, __VA_ARGS__)
-#define L_INFO( ... ) LOG(stdout, 1, __VA_ARGS__)
-#define L_ERROR( ... ) LOG(stderr, 1, __VA_ARGS__)
+#define printfln( ... ) LOG(stdout, __VA_ARGS__)
+#define perrorf( ... ) LOG(stderr, __VA_ARGS__)
 
 #define DEFAULT_TCPPORT     5600
 #define DEFAULT_BAUDRATE    115200

@@ -38,7 +38,7 @@ int connection_registerevents(struct connection *conn) {
 	ev.data.ptr = conn;
 	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn->sockfd, &ev);
 	if (err == ERR) {
-		L_ERROR("epoll_ctl: sockfd");
+		perrorf("epoll_ctl: sockfd");
         return ERR;
 	}
 	return OK;
@@ -53,7 +53,7 @@ int connection_unregisterevents(struct connection *conn) {
 	ev.data.ptr = conn;
 	err = epoll_ctl(epollfd, EPOLL_CTL_DEL, conn->sockfd, &ev);
 	if (err == ERR) {
-		L_ERROR("epoll_ctl: sockfd");
+		perrorf("epoll_ctl: sockfd");
         return ERR;
 	}
 	return OK;
@@ -82,17 +82,17 @@ int connection_close(struct connection *conn) {
     
     err = connection_unregisterevents(conn);
     if (err == ERR) {
-        L_ERROR("Cannot delete connection epoll events");
+        perrorf("Cannot delete connection epoll events");
         return err;
     }
 
     err = close(conn->sockfd);
     if (err == ERR) {
-        L_ERROR("Cannot close connection");
+        perrorf("Cannot close connection");
         return err;
     }
    
-    L_INFO("removing connection: %d", conn->slot);
+    printfln("removing connection: %d", conn->slot);
     connections[conn->slot] = NULL;
     free(conn);
     return OK;
@@ -107,10 +107,10 @@ int connection_add(int sockfd, struct sockaddr addr,
     slot = _getfreeslot();
     if (slot == ERR) {
         // No free spot, rejecting
-        L_INFO("Rejecting connection");
+        printfln("Rejecting connection");
         err = close(sockfd);
         if (err == ERR) {
-            L_ERROR("Cannot close connection");
+            perrorf("Cannot close connection");
             return err;
         }
         return OK;
@@ -118,7 +118,7 @@ int connection_add(int sockfd, struct sockaddr addr,
     
     conn = malloc(sizeof(struct connection));
     if (conn == NULL) {
-        L_ERROR("Cannot allocate connection memory");
+        perrorf("Cannot allocate connection memory");
         return ERR;
     }
 
@@ -138,12 +138,12 @@ int tcpconnection_accept(int listenfd) {
     
 	sockfd = accept(listenfd, &addr, &addrlen);
 	if (sockfd == ERR) {
-		L_ERROR("tcp accept");
+		perrorf("tcp accept");
         return ERR;
 	}
     
     struct sockaddr_in *ii = (struct sockaddr_in*)&addr;
-    L_INFO("New connection: %s:%d", inet_ntoa(ii->sin_addr), ii->sin_port);
+    printfln("New connection: %s:%d", inet_ntoa(ii->sin_addr), ii->sin_port);
     return connection_add(sockfd, addr, CNTYPE_TCP);
 }
 
@@ -154,12 +154,12 @@ int unixconnection_accept(int listenfd) {
     
 	sockfd = accept(listenfd, NULL, NULL);
 	if (sockfd == ERR) {
-		L_ERROR("tcp accept");
+		perrorf("tcp accept");
         return ERR;
 	}
     
     struct sockaddr_un *ii = (struct sockaddr_un*)&addr;
-    L_INFO("New connection: %s", ii->sun_path);
+    printfln("New connection: %s", ii->sun_path);
     return connection_add(sockfd, addr, CNTYPE_UNIX);
 }
 
@@ -179,22 +179,22 @@ int tcpconnection_listen() {
 		listenaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	} 
     else if(inet_pton(AF_INET, settings.tcpbind, &listenaddr.sin_addr)<=0) {
-        L_ERROR("Invalid address: %s", settings.tcpbind);
+        perrorf("Invalid address: %s", settings.tcpbind);
         return ERR;
 	}
 	listenaddr.sin_port = htons(settings.tcpport); 
 	err = bind(listenfd, (struct sockaddr*)&listenaddr, sizeof(listenaddr)); 
 	if (err) {
-		L_ERROR("Cannot bind on: %s", inet_ntoa(listenaddr.sin_addr));
+		perrorf("Cannot bind on: %s", inet_ntoa(listenaddr.sin_addr));
         return ERR;
 	}
 	
 	err = listen(listenfd, settings.tcpbacklog); 
 	if (err) {
-		L_ERROR("Cannot listen on: %s", inet_ntoa(listenaddr.sin_addr));
+		perrorf("Cannot listen on: %s", inet_ntoa(listenaddr.sin_addr));
         return ERR;
 	}
-	L_INFO(
+	printfln(
 		"Listening on %s:%d", 
 		inet_ntoa(listenaddr.sin_addr),
 		ntohs(listenaddr.sin_port)
@@ -217,7 +217,7 @@ int unixconnection_listen() {
     //sockfd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sockfd == ERR) {
-        L_ERROR("Cannot create unix domain socket");
+        perrorf("Cannot create unix domain socket");
         return ERR;
     }
     
@@ -236,7 +236,7 @@ int unixconnection_listen() {
     err = bind(sockfd, (const struct sockaddr *) &name, 
             sizeof(struct sockaddr_un));
     if (err == ERR) {
-        L_ERROR("Cannot bind to unix domain socket");
+        perrorf("Cannot bind to unix domain socket");
         return ERR;
     }
     
@@ -248,11 +248,11 @@ int unixconnection_listen() {
     
     err = listen(sockfd, settings.unixbacklog);
     if (err == ERR) {
-        L_ERROR("Cannot listen on unix domain socket");
+        perrorf("Cannot listen on unix domain socket");
         return ERR;
     }
     
-	L_INFO("Listening on unix domain socket: %s", settings.unixfile);
+	printfln("Listening on unix domain socket: %s", settings.unixfile);
     return sockfd;
 }
 
