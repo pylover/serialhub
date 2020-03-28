@@ -2,11 +2,14 @@
 #include "mux.h"
 
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/un.h>
+#include <sys/epoll.h>
 
 
 int unixconnection_listen() {
     struct sockaddr_un name;
+    struct epoll_event ev;
     int err, sockfd;
     
     /*
@@ -55,6 +58,15 @@ int unixconnection_listen() {
     }
     
 	printfln("Listening on unix domain socket: %s", settings.unixfile);
+
+    // unixlisten
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = sockfd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev) == ERR) {
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
+        exit(EXIT_FAILURE);
+    }
+
     return sockfd;
 }
 

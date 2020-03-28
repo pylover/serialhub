@@ -62,7 +62,7 @@ static int _process_connectionio(struct epoll_event *e) {
 
 int main(int argc, char **argv) {
     int tcplistenfd, unixlistenfd, fdcount, err, i;
-    struct epoll_event ev, events[MAXEVENTS], *e;
+    struct epoll_event events[MAXEVENTS], *e;
     
     // Parse command line arguments
     cliparse(argc, argv);
@@ -95,18 +95,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
    
-    /*
-     * Register epoll events
-     */
-    
-   
-    // unixlisten
-    ev.events = EPOLLIN | EPOLLOUT;
-    ev.data.fd = unixlistenfd;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unixlistenfd, &ev) == ERR) {
-        perrorf("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
-        exit(EXIT_FAILURE);
-    }
+
 
     /* Main Loop */
     while (1) {
