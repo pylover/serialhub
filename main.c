@@ -132,12 +132,18 @@ int main(int argc, char **argv) {
         for (i = 0; i < fdcount; i++) {
             e = &events[i];
             if (e->data.fd == tcplistenfd) {
-				tcpconnection_accept(tcplistenfd);
-                // TODO: error handling.
+				err = tcpconnection_accept(tcplistenfd);
+                if (err == ERR) {
+                    perrorf("TCP listen socket broken");
+                    exit(EXIT_FAILURE);
+                }
             }
             else if (e->data.fd == unixlistenfd) {
 				unixconnection_accept(unixlistenfd);
-                // TODO: error handling.
+                if (err == ERR) {
+                    perrorf("UNIX listen socket broken");
+                    exit(EXIT_FAILURE);
+                }
             }
             else if (e->data.fd == serialfd) {
                 err = _process_serialio(e);

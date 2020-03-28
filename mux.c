@@ -159,19 +159,29 @@ int tcpconnection_accept(int listenfd) {
 
 
 int unixconnection_accept(int listenfd) {
-	int sockfd;
+	int err, sockfd;
     struct sockaddr addr;
     
 	sockfd = accept(listenfd, NULL, NULL);
 	if (sockfd == ERR) {
-		perrorf("tcp accept");
-        return ERR;
+        if (errno == EBADF) {
+            return ERR;
+        }
+		perrorf("Cannot accept unix domain socket connection");
+        // Ignoring error, see accept(2)
+        return OK;
 	}
     
     struct sockaddr_un *ii = (struct sockaddr_un*)&addr;
     printfln("New connection: %s", ii->sun_path);
-    return connection_add(sockfd, addr, CNTYPE_UNIX);
+    err = connection_add(sockfd, addr, CNTYPE_UNIX);
+    if (err == ERR) {
+		perrorf("Cannot accept new tcp connection");
+        // Just cannot handle the new connection.
+    }
+    return OK;
 }
+
 
 int tcpconnection_listen() {
     int listenfd;
