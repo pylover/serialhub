@@ -2,13 +2,17 @@
 #include "mux.h"
 
 #include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/epoll.h>
+
 
 int tcpconnection_listen() {
     int listenfd;
 	int option = 1;
 	int err;
+    struct epoll_event ev;
     struct sockaddr_in listenaddr;
 
 	listenfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -41,6 +45,15 @@ int tcpconnection_listen() {
 		inet_ntoa(listenaddr.sin_addr),
 		ntohs(listenaddr.sin_port)
 	);
+
+    // epoll events
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = listenfd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev) == ERR) {
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
+        exit(EXIT_FAILURE);
+    }
+
     return listenfd;
 }
 

@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     
-    // Open serial port
+    // Open and register serial port
     serialfd = serialopen();
     if (serialfd == -1) {
         perrorf("Cannot open serial device: %s", settings.device);
@@ -99,14 +99,7 @@ int main(int argc, char **argv) {
      * Register epoll events
      */
     
-    // tcplisten
-    ev.events = EPOLLIN | EPOLLOUT;
-    ev.data.fd = tcplistenfd;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tcplistenfd, &ev) == ERR) {
-        perrorf("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
-        exit(EXIT_FAILURE);
-    }
-    
+   
     // unixlisten
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = unixlistenfd;
