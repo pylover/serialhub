@@ -19,11 +19,7 @@ struct connection{
 
 
 void connection_broadcast(const char *buff, int len);
+int connection_add(int fd, struct sockaddr addr, enum connectiontype type);
 int connection_close(struct connection *conn);
 
-int tcpconnection_listen();
-int tcpconnection_accept(int listenfd);
-
-int unixconnection_listen();
-int unixconnection_accept(int listenfd);
 #endif

@@ -3,8 +3,10 @@
 #include "common.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <sys/epoll.h>
 
 
 int termiosbaudrate(int b) {
@@ -62,6 +64,7 @@ int termiosbaudrate(int b) {
 
 int serialopen() {
     struct termios options;
+    struct epoll_event ev;
     int baudrate = termiosbaudrate(settings.baudrate);
     if (baudrate == ERR) {
         perrorf("Invalid baudrate: %d", settings.baudrate);
@@ -83,5 +86,13 @@ int serialopen() {
     options.c_oflag &= ~OPOST;                              /*Output*/
     tcsetattr(fd, TCSANOW, &options);
     tcflush(fd, TCOFLUSH);
+
+    // epoll events
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = fd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == ERR) {
+        perrorf("epoll_ctl: EPOLL_CTL_ADD, serial interface");
+        exit(EXIT_FAILURE);
+    }
     return fd;
 }

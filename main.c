@@ -3,6 +3,8 @@
 #include "tty.h"
 #include "cli.h"
 #include "mux.h"
+#include "tcp.h"
+#include "unix.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,6 +66,13 @@ int main(int argc, char **argv) {
     
     // Parse command line arguments
     cliparse(argc, argv);
+
+    // Create epoll instance
+    epollfd = epoll_create1(0);
+    if (epollfd < 0) {
+        perrorf("Cannot create epoll file descriptor");
+        exit(EXIT_FAILURE);
+    }
     
     // Open serial port
     serialfd = serialopen();
@@ -85,14 +94,7 @@ int main(int argc, char **argv) {
         perrorf("Cannot bind unix domain socket");
         exit(EXIT_FAILURE);
     }
-
-    // Create epoll instance
-    epollfd = epoll_create1(0);
-    if (epollfd < 0) {
-        perrorf("Cannot create epoll file descriptor");
-        exit(EXIT_FAILURE);
-    }
-    
+   
     /*
      * Register epoll events
      */
@@ -110,14 +112,6 @@ int main(int argc, char **argv) {
     ev.data.fd = unixlistenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unixlistenfd, &ev) == ERR) {
         perrorf("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");
-        exit(EXIT_FAILURE);
-    }
-
-    // serialport
-    ev.events = EPOLLIN | EPOLLOUT;
-    ev.data.fd = serialfd;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serialfd, &ev) == ERR) {
-        perrorf("epoll_ctl: EPOLL_CTL_ADD, serial interface");
         exit(EXIT_FAILURE);
     }
 
