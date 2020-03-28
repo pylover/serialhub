@@ -28,7 +28,6 @@ static int _process_serialio(struct epoll_event *e) {
             perrorf("Serial file closed");
             return ERR;
         }
-        //L_RAW("%.*s", bytes, buff);
         connection_broadcast(buff, bytes);
 	}
 	return OK;
@@ -48,13 +47,12 @@ static int _process_connectionio(struct epoll_event *e) {
         }
        
         err = write(serialfd, buff, bytes);
-        // TODO: if err < len: exit
-        if (err == ERR) {
+        // Simplified version of (err == ERR) | (err < bytes)
+        if (err < bytes) {             
             perrorf("Cannot write to serial device");
             return err;
         }
 	}
-    // TODO: EPOLLRDHUP
 
     return OK; 
 }
@@ -95,7 +93,9 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     
-    // Register epoll events
+    /*
+     * Register epoll events
+     */
     
     // tcplisten
     ev.events = EPOLLIN | EPOLLOUT;
@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    /* Main Loop */
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);
         if (fdcount == -1) {

@@ -30,21 +30,6 @@ static int _getfreeslot() {
 }
 
 
-int connection_registerevents(struct connection *conn) {
-    int err;
-	struct epoll_event ev;
-
-	ev.events = CONNECTIONEVENTS;
-	ev.data.ptr = conn;
-	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, conn->sockfd, &ev);
-	if (err == ERR) {
-		perrorf("epoll_ctl: sockfd");
-        return ERR;
-	}
-	return OK;
-}
-
-
 int connection_unregisterevents(struct connection *conn) {
     int err;
 	struct epoll_event ev;
@@ -99,21 +84,20 @@ int connection_close(struct connection *conn) {
 }
 
 
-int connection_add(int sockfd, struct sockaddr addr, 
-        enum connectiontype type) {
+int connection_add(int fd, struct sockaddr addr, enum connectiontype type) {
     int slot, err;
+	struct epoll_event ev;
     struct connection *conn;
 
     slot = _getfreeslot();
     if (slot == ERR) {
         // No free spot, rejecting
         printfln("Rejecting connection");
-        err = close(sockfd);
+        err = close(fd);
         if (err == ERR) {
-            perrorf("Cannot close connection");
-            return err;
+            perrorf("Cannot close rejected connection");
         }
-        return OK;
+        return ERR; 
     }
     
     conn = malloc(sizeof(struct connection));
@@ -123,28 +107,54 @@ int connection_add(int sockfd, struct sockaddr addr,
     }
 
     conn->slot = slot;
-    conn->sockfd = sockfd;
+    conn->sockfd = fd;
     conn->type = type;
     conn->address = addr;
+
+    // Register epoll events
+	ev.events = CONNECTIONEVENTS;
+	ev.data.ptr = conn;
+	err = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+	if (err == ERR) {
+		perrorf("epoll_ctl: sockfd");
+        free(conn);    
+        return ERR;
+	}
+
     connections[slot] = conn;
-    return connection_registerevents(conn);
+	return OK;
 }
 
 
 int tcpconnection_accept(int listenfd) {
-	int sockfd;
+	int err, sockfd;
 	struct sockaddr addr; 
 	socklen_t addrlen = sizeof(struct sockaddr);
     
 	sockfd = accept(listenfd, &addr, &addrlen);
 	if (sockfd == ERR) {
-		perrorf("tcp accept");
-        return ERR;
+        if (errno == EBADF) {
+            return ERR;
+        }
+        // TODO: LOG address AND THE REASON
+		perrorf("Cannot accept new tcp connection");
+        // Ignoring error, see accept(2)
+        return OK;
 	}
     
     struct sockaddr_in *ii = (struct sockaddr_in*)&addr;
-    printfln("New connection: %s:%d", inet_ntoa(ii->sin_addr), ii->sin_port);
-    return connection_add(sockfd, addr, CNTYPE_TCP);
+    printfln(
+        "New TCP connection: %s:%d", 
+        inet_ntoa(ii->sin_addr), 
+        ii->sin_port
+    );
+    
+    err = connection_add(sockfd, addr, CNTYPE_TCP);
+    if (err == ERR) {
+		perrorf("Cannot accept new tcp connection");
+        // Just cannot handle the new connection.
+    }
+    return OK;
 }
 
 
