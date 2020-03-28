@@ -8,7 +8,7 @@
 #define ARG_UNIXBACKLOG 0x2
 
 
-const char *argp_program_version = "1.0a";
+const char *argp_program_version = VERSION;
 const char *argp_program_bug_address = "http://github.com/pylover/serialhub";
 static char doc[] = "Serial Interface multiplexer";
 static char args_doc[] = "DEVICE";
