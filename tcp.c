@@ -64,7 +64,6 @@ int tcpconnection_accept(int listenfd) {
         if (errno == EBADF) {
             return ERR;
         }
-        // TODO: LOG address AND THE REASON
 		perrorf("Cannot accept new tcp connection");
         // Ignoring error, see accept(2)
         return OK;
