@@ -5,7 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
-
+#define VERSION 1.0.0a
 #define OK  0
 #define ERR -1
 
