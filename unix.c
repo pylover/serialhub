@@ -60,7 +60,7 @@ int unixconnection_listen() {
 	printfln("Listening on unix domain socket: %s", settings.unixfile);
 
     // unixlisten
-    ev.events = EPOLLIN | EPOLLOUT;
+    ev.events = EPOLLIN;
     ev.data.fd = sockfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev) == ERR) {
         perrorf("epoll_ctl: EPOLL_CTL_ADD, unix listen socket");

@@ -43,7 +43,7 @@ int tcpconnection_listen() {
     printsocket("Listening on: ", listenaddr);
 
     // epoll events
-    ev.events = EPOLLIN | EPOLLOUT;
+    ev.events = EPOLLIN;
     ev.data.fd = listenfd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev) == ERR) {
         perrorf("epoll_ctl: EPOLL_CTL_ADD, tcplisten socket");
