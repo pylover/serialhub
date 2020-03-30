@@ -88,7 +88,7 @@ int serialopen() {
     tcflush(fd, TCOFLUSH);
 
     // epoll events
-    ev.events = EPOLLIN | EPOLLOUT;
+    ev.events = EPOLLIN;
     ev.data.fd = fd;
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == ERR) {
         perrorf("epoll_ctl: EPOLL_CTL_ADD, serial interface");
