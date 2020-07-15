@@ -54,13 +54,17 @@ Description=Serial port multiplexer
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/serialhub --baudrate 115200 /dev/ttyAMA0
+ExecStart=/usr/local/bin/serialhub \
+    --baudrate 115200 \
+    --unixfile /run/serialhub.s /dev/ttyACM0
 Restart=on-failure
+User=root
+Group=dialout
+UMask=003
 KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target
-
 ```
 
 Then:
