@@ -57,5 +57,5 @@ systemd: install
 		sudo tee /etc/systemd/system/serialhub.service > /dev/null
 	sudo systemctl daemon-reload
 	sudo systemctl enable serialhub.service
-	sudo service serialhub start
+	sudo service serialhub restart
 
