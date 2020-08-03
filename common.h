@@ -5,7 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define VERSION "1.0.2a"
+#define VERSION "1.1.0"
 #define OK  0
 #define ERR -1
 
