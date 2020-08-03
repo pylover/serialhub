@@ -27,3 +27,35 @@ test: serialhub
 .PHONY: install
 install: serialhub
 	install -m 755 serialhub $(DESTDIR)$(PREFIX)/bin
+
+
+define SYSTEMDSERVICE
+[Unit]
+Description=Serial port multiplexer
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/serialhub \
+    --baudrate 115200 \
+    --unixfile /run/serialhub.s /dev/ttyACM0
+Restart=on-failure
+User=root
+Group=dialout
+UMask=003
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
+endef
+
+export SYSTEMDSERVICE
+
+
+.PHONY: systemd
+systemd: install
+	@echo "$$SYSTEMDSERVICE" | \
+		sudo tee /etc/systemd/system/serialhub.service > /dev/null
+	sudo systemctl daemon-reload
+	sudo systemctl enable serialhub.service
+	sudo service serialhub start
+
