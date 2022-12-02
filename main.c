@@ -14,6 +14,7 @@
 
 
 static int serialfd;
+int epollfd;
 
 
 static int _process_serialio(struct epoll_event *e) {

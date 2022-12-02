@@ -64,7 +64,7 @@ struct Settings {
 };
 
 
-volatile int epollfd;
-volatile struct Settings settings;
+extern int epollfd;
+extern struct Settings settings;
 
 #endif

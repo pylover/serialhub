@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-volatile struct Settings settings = {
+struct Settings settings = {
     NULL,
     DEFAULT_BAUDRATE,
 	DEFAULT_TCPBIND, 
