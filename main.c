@@ -1,4 +1,3 @@
-
 #include "common.h"
 #include "tty.h"
 #include "cli.h"
@@ -48,23 +47,23 @@ static int _process_connectionio(struct epoll_event *e) {
             connection_close(conn);
             return OK;
         }
-       
+
         err = write(serialfd, buff, bytes);
         // Simplified version of (err == ERR) | (err < bytes)
-        if (err < bytes) {             
+        if (err < bytes) {
             perrorf("Cannot write to serial device");
             return err;
         }
 	}
 
-    return OK; 
+    return OK;
 }
 
 
 int main(int argc, char **argv) {
     int tcplistenfd, unixlistenfd, fdcount, err, i;
     struct epoll_event events[MAXEVENTS], *e;
-    
+
     // Parse command line arguments
     cliparse(argc, argv);
 
@@ -74,7 +73,7 @@ int main(int argc, char **argv) {
         perrorf("Cannot create epoll file descriptor");
         exit(EXIT_FAILURE);
     }
-    
+
     // Open and register serial port
     serialfd = serialopen();
     if (serialfd == -1) {
@@ -88,14 +87,14 @@ int main(int argc, char **argv) {
         perrorf("Cannot bind tcp socket");
         exit(EXIT_FAILURE);
     }
-    
+
     // Listen on unix domain socket
     unixlistenfd = unixconnection_listen();
     if (unixlistenfd == ERR) {
         perrorf("Cannot bind unix domain socket");
         exit(EXIT_FAILURE);
     }
-   
+
     /* Main Loop */
     while (1) {
         fdcount = epoll_wait(epollfd, events, MAXEVENTS, -1);
@@ -103,7 +102,7 @@ int main(int argc, char **argv) {
             perrorf("epoll_wait returned: %d", fdcount);
             exit(EXIT_FAILURE);
         }
-        
+
         for (i = 0; i < fdcount; i++) {
             e = &events[i];
             if (e->data.fd == tcplistenfd) {
@@ -125,7 +124,7 @@ int main(int argc, char **argv) {
                 if (err == ERR) {
                     exit(EXIT_FAILURE);
                 }
-            } 
+            }
             else {
                 err = _process_connectionio(e);
                 if (err == ERR) {
